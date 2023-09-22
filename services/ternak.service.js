@@ -411,15 +411,15 @@ class _ternak {
             const { error, value } = schema.validate(req.body);
             if (error) newError(400, error.details[0].message, 'createTernak Service');
 
-            // Check is premium user
-            if(req.dataAuth && !req.dataAuth.is_premium_farm){
-                // Check ternak count
-                const ternakCount = await this.db.Ternak.count({where: {id_peternakan: req.dataAuth.id_peternakan}});
-                console.log(ternakCount)
-                if(ternakCount >= config.premiumFarm.limitTernak) {
-                    newError(403, `Maksimal ternak ${config.premiumFarm.limitTernak}, silahkan upgrade ke premium`, 'createTernak Service');
-                }
-            } 
+            // // Check is premium user
+            // if(req.dataAuth && !req.dataAuth.is_premium_farm){
+            //     // Check ternak count
+            //     const ternakCount = await this.db.Ternak.count({where: {id_peternakan: req.dataAuth.id_peternakan}});
+            //     console.log(ternakCount)
+            //     if(ternakCount >= config.premiumFarm.limitTernak) {
+            //         newError(403, `Maksimal ternak ${config.premiumFarm.limitTernak}, silahkan upgrade ke premium`, 'createTernak Service');
+            //     }
+            // }             
 
             // Validate tanggal_lahir
             if (value.tanggal_lahir && new Date(value.tanggal_lahir) > new Date()) newError(400, 'Tanggal lahir must be less than today', 'createTernak Service');
@@ -470,8 +470,8 @@ class _ternak {
                 const timbangan = await this.db.Timbangan.create({
                     id_ternak: add.id_ternak,
                     rf_id: add.rf_id,
-                    berat: add.berat ? add.berat : 0,
-                    suhu: add.suhu ? add.suhu : 0,
+                    berat: value.berat ? value.berat : 0,
+                    suhu: value.suhu ? value.suhu : 0,
                     tanggal_timbang: new Date(),
                 });
                 if (!timbangan) newError(500, 'Gagal menambahkan timbangan', 'createTernak Service');
@@ -487,6 +487,60 @@ class _ternak {
                     tanggal: new Date(),
                 });
                 if (!riwayat_fase) newError(500, 'Gagal menambahkan riwayat fase', 'createTernak Service');
+            }
+
+            // CONCERN : TAMBAH FATTENING
+
+            const faseFattening = await this.db.Fase.findOne({ 
+                attributes : ['id_fp'],
+                where : {
+                    fase: "Fattening"
+                }
+            });
+            const idFattening = faseFattening.dataValues.id_fp;
+
+            const rfTernak = await this.db.Ternak.findOne({ where: { rf_id:value.rf_id } });
+
+            if(idFattening == value.id_fp ){
+                try {
+                    // Buat data Fattening baru dengan "id_ternak" yang ditemukan
+                    const newFattening = await this.db.Fattening.create({
+                        id_peternakan: req.dataAuth.id_peternakan,
+                        id_ternak: rfTernak.id_ternak,
+                        id_kandang: rfTernak.id_kandang,
+                        bobot_fattening : value.berat,
+                        // keterangan,
+                        // status_keluar,
+                        rf_id : rfTernak.rf_id,
+                    });
+
+                    if(value.berat){
+                        const newTimbangan = await this.db.Timbangan.create({
+                            berat: value.berat,
+                            suhu: 38,
+                            id_ternak: rfTernak.id_ternak,
+                            rf_id: rfTernak.rf_id
+                        }
+                        )
+                        return {
+                            code: 201,
+                            data: {newFattening,newTimbangan},
+                        };
+                    }
+        
+                    if (!newFattening) {
+                        return newError(500, 'Failed to create Fattening data', 'createFattening Service');
+                    }
+                    return {
+                            code: 201,
+                            data: {newFattening},
+                    };
+                    
+        
+                } catch (error) {
+                    console.log(error);
+                    return errorHandler(error);
+                }
             }
 
             return {
