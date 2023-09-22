@@ -40,6 +40,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    tahap_fattening: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     keterangan: {
       type: DataTypes.ENUM,
       values: [

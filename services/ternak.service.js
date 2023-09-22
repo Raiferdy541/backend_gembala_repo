@@ -508,6 +508,7 @@ class _ternak {
                         id_peternakan: req.dataAuth.id_peternakan,
                         id_ternak: rfTernak.id_ternak,
                         id_kandang: rfTernak.id_kandang,
+                        tahap_fattening: 1,
                         bobot_fattening : value.berat,
                         // keterangan,
                         // status_keluar,

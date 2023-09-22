@@ -39,6 +39,9 @@ module.exports = {
       },
       {
         fase: "Lepas Sapih"
+      },
+      {
+        fase: "Fattening"
       }
     ], {});
   },

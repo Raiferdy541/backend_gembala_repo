@@ -47,6 +47,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true
       },
+      tahap_fattening: {
+        type: Sequelize.INTEGER,
+        allowNull: true
+      },
       keterangan:{
         type: Sequelize.ENUM,
         values: [
