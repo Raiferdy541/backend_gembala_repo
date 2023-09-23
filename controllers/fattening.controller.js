@@ -20,6 +20,7 @@ const fatteningController = (db) => {
     /**
      * Get Fattening MAIN
      */
+
     FatteningController.get('/main_ternak', authentication, adminMiddleware, async (req, res, next) => {
             const list = await s$fattening.getTernakMainFattening(req);
             response.sendResponse(res, list);
@@ -29,6 +30,24 @@ const fatteningController = (db) => {
         const list = await s$fattening.createFattening(req);
         response.sendResponse(res, list);
     });
+
+    FatteningController.post('/tahap_dua', authentication, adminMiddleware, async (req, res, next) => {
+        const list = await s$fattening.createFatteningTahapDua(req);
+        response.sendResponse(res, list);
+    });
+
+    FatteningController.post('/tahap_tiga', authentication, adminMiddleware, async (req, res, next) => {
+        const list = await s$fattening.createFatteningTahapTiga(req);
+        response.sendResponse(res, list);
+    });
+
+    FatteningController.get('/keluar', authentication, adminMiddleware, async (req, res, next) => {
+        const list = await s$fattening.getTernakFatteningKeluar(req);
+        response.sendResponse(res, list);
+    });
+
+
+    //////////////
     
 
     FatteningController.put('/main_ternak', authentication, adminMiddleware, async (req, res, next) => {
