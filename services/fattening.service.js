@@ -422,38 +422,54 @@ class _fattening {
                     status_keluar,
                     rf_id,
                 });
+                
+                // CONCERN ADD RIWAYAT FATT
+                const tahap1 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:1} });
+                const tahap2 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:2} });
+                const tahap3 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:3} });
+
+                const newRiwayatFattening = await this.db.RiwayatFattening.create({
+                    id_peternakan: req.dataAuth.id_peternakan,
+                    id_ternak: ternak.id_ternak,
+                    id_kandang : ternakFat.id_kandang,
+                    bobot_tahap_1 : tahap1.bobot_fattening,
+                    bobot_tahap_2 : tahap2.bobot_fattening,
+                    bobot_tahap_3 : tahap3.bobot_fattening,
+                    status_keluar,
+                    rf_id,
+                })
 
                 // DELETE Query Data [KALO DI DELETE SEMUA DATA BERELASI AKAN MUSNAH]
                 // SOLUSINYA BUAT TABEL BARU TERUS CREATE RIWAYATNYA
 
-                // const del = await this.db.Ternak.destroy({
-                //     where: {
-                //         id_ternak: ternakFat.id_ternak,
-                //         id_peternakan: req.dataAuth.id_peternakan
-                //     }
-                // });
-                // if (del <= 0) newError(500, 'Gagal menghapus ternak', 'deleteTernak Service');
-    
-                if(bobot_fattening){
-                    const newTimbangan = await this.db.Timbangan.create({
-                        berat: bobot_fattening,
-                        suhu: 38,
-                        id_ternak: ternak.id_ternak,
-                        rf_id: rf_id,
+                const del = await this.db.Ternak.destroy({
+                    where: {
+                        id_ternak: ternakFat.id_ternak,
+                        id_peternakan: req.dataAuth.id_peternakan
                     }
-                    )
-                    return {
-                        code: 201,
-                        data: {newFattening,newTimbangan},
-                    };
-                }
+                });
+                if (del <= 0) newError(500, 'Gagal menghapus ternak', 'deleteTernak Service');
+    
+                // if(bobot_fattening){
+                //     const newTimbangan = await this.db.Timbangan.create({
+                //         berat: bobot_fattening,
+                //         suhu: 38,
+                //         id_ternak: ternak.id_ternak,
+                //         rf_id: rf_id,
+                //     }
+                //     )
+                //     return {
+                //         code: 201,
+                //         data: {newFattening,newTimbangan},
+                //     };
+                // }
     
                 if (!newFattening) {
                     return newError(500, 'Failed to create Fattening data', 'createFattening Service');
                 }
                 return {
                         code: 201,
-                        data: {newFattening},
+                        data: {newFattening,newRiwayatFattening},
                 };
                 
     
