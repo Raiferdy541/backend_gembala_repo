@@ -97,28 +97,28 @@ class _auth{
             if (checkEmail) newError(400, 'Email sudah terdaftar', 'Register Service');
 
             // Get longtitude, latitude and alamat_postcode external API
-            const geocode = await axios.get(config.geocode.base_url, {
-                params: {
-                    auth: config.geocode.auth,
-                    locate: value.postcode,
-                    geoit: config.geocode.geoit,
-                    region: config.geocode.region
-                },
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept-Encoding': 'application/json',
-                }
-            })
-            if(geocode.data.error) newError(400, 'Gagal mendapatkan data geocode, silahkan periiksa kembali postcode anda', 'Register Service');
+            // const geocode = await axios.get(config.geocode.base_url, {
+            //     params: {
+            //         auth: config.geocode.auth,
+            //         locate: value.postcode,
+            //         geoit: config.geocode.geoit,
+            //         region: config.geocode.region
+            //     },
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Accept-Encoding': 'application/json',
+            //     }
+            // })
+            // if(geocode.data.error) newError(400, 'Gagal mendapatkan data geocode, silahkan periiksa kembali postcode anda', 'Register Service');
 
             // add peternakan
             const addPeternakan = await this.db.Peternakan.create({
                 nama_peternakan: value.nama_peternakan,
                 alamat: value.alamat,
                 postcode: value.postcode,
-                longitude: geocode.data.longt,
-                latitude: geocode.data.latt,
-                alamat_postcode: geocode.data.standard.city + ', ' + geocode.data.standard.statename + ', ' + geocode.data.standard.countryname + ', ' + geocode.data.standard.postal
+                longitude: null,
+                latitude: null,
+                alamat_postcode: null
             }, {transaction: t});
             if(!addPeternakan) newError(400, 'Gagal menambahkan peternakan', 'Register Service');
 
@@ -154,6 +154,98 @@ class _auth{
             return errorHandler(error);
         }
     }
+
+    // CONCERN
+        /// Register Service
+        registerActive = async (data) => {
+            const t = await this.db.sequelize.transaction();
+            try{
+                // Validate data
+                const schema = joi.object({
+                    nama_pengguna: joi.string().min(4).max(30).required(),
+                    email: joi.string().email().required(),
+                    nomor_telepon: joi.string().required(),
+                    alamat: joi.string().required(),
+                    postcode: joi.string().required(),
+                    nama_peternakan: joi.string().required(),
+                    kata_sandi: joi.string().min(8).required(),
+                    ulangi_kata_sandi: joi.ref('kata_sandi')
+                });
+                const {error, value} = schema.validate(data);
+                if (error) newError(400, error.details[0].message, 'Register Service');
+    
+                // Check if user exist
+                const checkUsername = await this.db.AuthUser.findOne({where : {nama_pengguna: value.nama_pengguna}});
+                if (checkUsername) newError(400, 'Username sudah terdaftar', 'Register Service');
+    
+                // check nomor telepon
+                const checkNomorTelepon = await this.db.AuthUser.findOne({where : {nomor_telepon: value.nomor_telepon}});
+                if (checkNomorTelepon) newError(400, 'Nomor telepon sudah terdaftar', 'Register Service');
+    
+                // check if email exist
+                const checkEmail = await this.db.AuthUser.findOne({where : {email: value.email}});
+                if (checkEmail) newError(400, 'Email sudah terdaftar', 'Register Service');
+    
+                // // Get longtitude, latitude and alamat_postcode external API
+                // const geocode = await axios.get(config.geocode.base_url, {
+                //     params: {
+                //         auth: config.geocode.auth,
+                //         locate: value.postcode,
+                //         geoit: config.geocode.geoit,
+                //         region: config.geocode.region
+                //     },
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'Accept-Encoding': 'application/json',
+                //     }
+                // })
+                // if(geocode.data.error) newError(400, 'Gagal mendapatkan data geocode, silahkan periiksa kembali postcode anda', 'Register Service');
+    
+                // add peternakan
+                const addPeternakan = await this.db.Peternakan.create({
+                    nama_peternakan: value.nama_peternakan,
+                    alamat: value.alamat,
+                    postcode: value.postcode,
+                    longitude: null,
+                    latitude: null,
+                    alamat_postcode: null
+                }, {transaction: t});
+                if(!addPeternakan) newError(400, 'Gagal menambahkan peternakan', 'Register Service');
+    
+                // Hash password
+                value.kata_sandi = await hashPassword(value.kata_sandi);
+                
+                // Insert data
+                const register = await this.db.AuthUser.create({
+                    nama_pengguna: value.nama_pengguna,
+                    email: value.email,
+                    role: 'admin',
+                    status: 'active',
+                    id_peternakan: addPeternakan.id_peternakan,
+                    nomor_telepon: value.nomor_telepon,
+                    kata_sandi: value.kata_sandi
+                }, {transaction: t});
+                if (!register) newError(400, 'Gagal registrasi', 'Register Service');
+    
+                // Send email verification
+                // verifyNewAccount(register);
+    
+                // Commit transaction
+                await t.commit();
+    
+                return {
+                    code: 200,
+                    data: {
+                        message: 'Akun telah dibuat'
+                    }
+                };
+            }catch (error){
+                await t.rollback();
+                return errorHandler(error);
+            }
+        }
+
+    //////////////////
 
     /// Logout Service
     logout = async (req, res) => {

@@ -38,6 +38,12 @@ const authController = (db) =>{
         response.sendResponse(res, register);
     });
 
+    AuthController.post('/register-active', async (req, res, next) => {
+        const register = await s$auth.registerActive(req.body);
+        response.sendResponse(res, register);
+    });
+
+
     /**
      * Logout
      */

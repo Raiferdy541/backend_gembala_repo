@@ -133,7 +133,7 @@ class _fattening {
                 // Check if the item already exists in the result
                 if (!result[id_ternak]) {
                     result[id_ternak] = {
-                        id_fattening,
+                        // id_fattening,
                         id_peternakan: req.dataAuth.id_peternakan,
                         rf_id,
                         id_ternak,
@@ -422,6 +422,17 @@ class _fattening {
                     status_keluar,
                     rf_id,
                 });
+
+                // DELETE Query Data [KALO DI DELETE SEMUA DATA BERELASI AKAN MUSNAH]
+                // SOLUSINYA BUAT TABEL BARU TERUS CREATE RIWAYATNYA
+
+                // const del = await this.db.Ternak.destroy({
+                //     where: {
+                //         id_ternak: ternakFat.id_ternak,
+                //         id_peternakan: req.dataAuth.id_peternakan
+                //     }
+                // });
+                // if (del <= 0) newError(500, 'Gagal menghapus ternak', 'deleteTernak Service');
     
                 if(bobot_fattening){
                     const newTimbangan = await this.db.Timbangan.create({

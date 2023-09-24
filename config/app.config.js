@@ -16,7 +16,9 @@ module.exports = {
     email: "cs.gembala@gmail.com",
     password: "CS.Gembala",
     password_app: "rvdkurrjeliffqwj",
-    url_redirect_verify: "http://gembala.sembadafarm.com/verify/success-verify"
+    // url_redirect_verify: "http://gembala.sembadafarm.com/verify/success-verify"
+    url_redirect_verify: "https://breeding.sinergifarm.id//verify/success-verify"
+
   },
 
   // Configuration premium account
