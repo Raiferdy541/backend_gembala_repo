@@ -504,6 +504,30 @@ class _fattening {
         }
     }
     
+    getRiwayatFattening = async (req) => {
+        try {
+            const riwayat_fattening = await this.db.RiwayatFattening.findAll({
+                where: {
+                    id_peternakan: req.dataAuth.id_peternakan,
+                }
+            });
+    
+            if (riwayat_fattening.length <= 0) {
+                newError(404, 'Data Ternak Fattening Tahap 3 tidak ditemukan', 'getriwayat_fattening Service');
+            }
+    
+            return {
+                code: 200,
+                data: {
+                    total: riwayat_fattening.length,
+                    list: riwayat_fattening,
+                },
+            };
+        } catch (error) {
+            return errorHandler(error);
+        }
+    }
+    
 
     ////////////////////
 

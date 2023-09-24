@@ -46,6 +46,12 @@ const fatteningController = (db) => {
         response.sendResponse(res, list);
     });
 
+    
+    FatteningController.get('/riwayat_fattening', authentication, adminMiddleware, async (req, res, next) => {
+        const list = await s$fattening.getRiwayatFattening(req);
+        response.sendResponse(res, list);
+    });
+
 
     //////////////
     
