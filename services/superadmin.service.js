@@ -176,6 +176,39 @@ class _superAdmin{
             return errorHandler(error);
         }
     }
+
+    
+    /// DELETE AKUN DARI SUPERADMIN CONCERN
+    deleteAccountViaSuperAdmin = async (req) => {
+        try{
+            // Validate data
+            const schema = joi.object({
+                id_user: joi.number().required()
+            });
+            const {error, value} = schema.validate(req.body);
+            if (error) newError(400, error.details[0].message, 'DeleteAccount Service');
+            
+            const account = await this.db.AuthUser.findOne({ where: { id_user: value.id_user } });
+            if(!account) newError(400, error.details[0].message, 'Akun tidak ada');
+
+
+            // Delete data
+            const deletedAccount = await this.db.AuthUser.destroy({where: {id_user :value.id_user }});
+            if (deletedAccount <= 0) newError(400, 'Gagal menghapus akun', 'DeleteAccount Service');
+
+            return {
+                code: 200,
+                data: {
+                    id_user: account.id_user,
+                    nama_pengguna: account.nama_pengguna,
+                    deletedAt: date.format(new Date(), 'YYYY-MM-DD HH:mm:ss')
+                }
+            }
+        }catch(err){
+            return errorHandler(err);
+        }
+    }
+    
 }
 
 module.exports = (db) => new _superAdmin(db);

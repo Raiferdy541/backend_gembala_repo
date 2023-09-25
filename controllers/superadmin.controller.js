@@ -43,6 +43,12 @@ const superAdminController = (db) => {
         response.sendResponse(res, result);
     });
 
+    
+    SuperAdminController.delete('/delete-account-via-sa', authentication, superAdminMiddleware, async (req, res, next) => {
+        const deleteAccounts = await s$superAdmin.deleteAccountViaSuperAdmin(req);
+        response.sendResponse(res, deleteAccounts);
+    });
+
     /**
      * Set free farm auto
      */

@@ -341,7 +341,7 @@ class _auth{
             return errorHandler(err);
         }
     }
-    
+
     /// Update Account Service
     updateAccount = async (req) => {
         // Validate data

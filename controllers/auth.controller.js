@@ -95,6 +95,7 @@ const authController = (db) =>{
         response.sendResponse(res, deleteAccount);
     });
 
+
     /**
      * Update Account
      * @param {string} nama_lengkap
