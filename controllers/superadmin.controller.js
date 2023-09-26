@@ -43,7 +43,17 @@ const superAdminController = (db) => {
         response.sendResponse(res, result);
     });
 
-    
+    // concern
+    SuperAdminController.post('/register', authentication, superAdminMiddleware, async (req, res, next) => {
+        const result = await s$superAdmin.register(req);
+        response.sendResponse(res, result);
+    });
+
+    SuperAdminController.post('/register-active', authentication, superAdminMiddleware, async (req, res, next) => {
+        const result = await s$superAdmin.registerActive(req);
+        response.sendResponse(res, result);
+    });
+
     SuperAdminController.delete('/delete-account-via-sa', authentication, superAdminMiddleware, async (req, res, next) => {
         const deleteAccounts = await s$superAdmin.deleteAccountViaSuperAdmin(req);
         response.sendResponse(res, deleteAccounts);

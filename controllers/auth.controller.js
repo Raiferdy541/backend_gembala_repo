@@ -33,15 +33,15 @@ const authController = (db) =>{
      * @param {string} repeat_password
      */
 
-    AuthController.post('/register', async (req, res, next) => {
-        const register = await s$auth.register(req.body);
-        response.sendResponse(res, register);
-    });
+    // AuthController.post('/register', async (req, res, next) => {
+    //     const register = await s$auth.register(req.body);
+    //     response.sendResponse(res, register);
+    // });
 
-    AuthController.post('/register-active', async (req, res, next) => {
-        const register = await s$auth.registerActive(req.body);
-        response.sendResponse(res, register);
-    });
+    // AuthController.post('/register-active', async (req, res, next) => {
+    //     const register = await s$auth.registerActive(req.body);
+    //     response.sendResponse(res, register);
+    // });
 
 
     /**
