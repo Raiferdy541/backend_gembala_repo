@@ -343,6 +343,8 @@ class _superAdmin{
             // Send email verification
             // verifyNewAccount(register);
 
+            // End Concern
+
             // Commit transaction
             await t.commit();
 
@@ -350,8 +352,8 @@ class _superAdmin{
                 code: 200,
                 data: {
                     message: 'Akun telah dibuat',
-                    token,
-                    expiresAt: date.format(date.addSeconds(new Date(), config.jwt.expiresIn), 'YYYY-MM-DD HH:mm:ss')
+                    // token,
+                    // expiresAt: date.format(date.addSeconds(new Date(), config.jwt.expiresIn), 'YYYY-MM-DD HH:mm:ss')
                 }
             };
         }catch (error){
