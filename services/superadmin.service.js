@@ -407,7 +407,46 @@ class _superAdmin{
             return errorHandler(err);
         }
     }
-    
+
+    // DELETE AKUN DARI SUPERADMIN CONCERN
+    deleteAccountViaSuperAdminParams = async (req) => {
+        try {
+            // Validate data
+            const schema = joi.object({
+                id_user: joi.number().required()
+            });
+            const { error, value } = schema.validate(req.query); // Menggunakan req.params
+            console.log(req.query)
+            if (error) newError(400, error.details[0].message, 'DeleteAccount Service');
+
+            const account = await this.db.AuthUser.findOne({ where: { id_user: value.id_user } });
+
+            if (!account) newError(400, 'Akun tidak ada');
+
+            const peternakan = await this.db.Peternakan.findOne({ where: { id_peternakan: account.id_peternakan } });
+
+            const deletedPeternakan = await this.db.Peternakan.destroy({ where: { id_peternakan: account.id_peternakan } });
+
+            if (deletedPeternakan <= 0) newError(400, 'Gagal menghapus peternakan', 'DeletePeternakan Service');
+
+            // Delete data
+            const deletedAccount = await this.db.AuthUser.destroy({ where: { id_user: value.id_user } });
+
+            return {
+                code: 200,
+                data: {
+                    id_user: account.id_user,
+                    nama_pengguna: account.nama_pengguna,
+                    id_peternakan: account.id_peternakan,
+                    nama_peternakan: peternakan.nama_peternakan,
+                    deletedAt: date.format(new Date(), 'YYYY-MM-DD HH:mm:ss')
+                }
+            };
+        } catch (err) {
+            return errorHandler(err);
+        }
+    };
+
 }
 
 module.exports = (db) => new _superAdmin(db);
