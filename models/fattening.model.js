@@ -44,18 +44,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true
     },
-    keterangan: {
-      type: DataTypes.ENUM,
-      values: [
-          'Terpenuhi',
-          'Tidak Terpenuhi'
-      ],
-      allowNull: true
-    },
-    status_keluar: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
+    // keterangan: {
+    //   type: DataTypes.ENUM,
+    //   values: [
+    //       'Terpenuhi',
+    //       'Tidak Terpenuhi'
+    //   ],
+    //   allowNull: true
+    // },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false

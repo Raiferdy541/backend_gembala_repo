@@ -51,18 +51,14 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true
       },
-      keterangan:{
-        type: Sequelize.ENUM,
-        values: [
-          'Terpenuhi',
-          'Tidak Terpenuhi'
-        ],
-        allowNull: true
-      },
-      status_keluar: {
-        type: Sequelize.STRING,
-        allowNull: true
-      },
+      // keterangan:{
+      //   type: Sequelize.ENUM,
+      //   values: [
+      //     'Terpenuhi',
+      //     'Tidak Terpenuhi'
+      //   ],
+      //   allowNull: true
+      // },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

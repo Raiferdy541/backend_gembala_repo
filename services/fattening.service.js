@@ -128,8 +128,10 @@ class _fattening {
     
             // Transform data structure as requested
             const transformedData = ternakMainFattening.reduce((result, item) => {
-                const { id_fattening, rf_id, id_ternak, id_kandang, bobot_fattening, tahap_fattening, keterangan, status_keluar, createdAt, updatedAt } = item;
-    
+                const { id_fattening, rf_id, id_ternak, id_kandang, bobot_fattening, tahap_fattening, keterangan, createdAt, updatedAt } = item;
+                
+                // const tahap1 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:1} });
+
                 // Check if the item already exists in the result
                 if (!result[id_ternak]) {
                     result[id_ternak] = {
@@ -143,7 +145,6 @@ class _fattening {
                                 id_fattening,
                                 bobot_fattening,
                                 keterangan,
-                                status_keluar,
                                 createdAt,
                                 updatedAt
                             }
@@ -155,7 +156,6 @@ class _fattening {
                         id_fattening,
                         bobot_fattening,
                         keterangan,
-                        status_keluar,
                         createdAt,
                         updatedAt
                     };
@@ -178,6 +178,111 @@ class _fattening {
         }
     }
     
+    //CONCERNNNNN
+
+    getTernakMainFatteningDetail = async (req) => {
+        try {
+            // const ternak = await this.db.Ternak.findOne({ where: { rf_id } });
+    
+            // Get ternak in waiting list perkawinan
+            const ternakMainFattening = await this.db.Fattening.findAll({
+                where: {
+                    id_peternakan: req.dataAuth.id_peternakan
+                }
+            });
+    
+            if (ternakMainFattening.length <= 0) newError(404, 'Data Ternak Main Fattening tidak ditemukan', 'getternakMainFattening Service');
+    
+            // Get the current date and time
+            const currentDate = new Date();
+    
+            // Transform data structure as requested
+            const transformedData = ternakMainFattening.reduce((result, item) => {
+                const { id_fattening, rf_id, id_ternak, id_kandang, bobot_fattening, tahap_fattening, createdAt, updatedAt } = item;
+    
+                // Calculate lama_tahap in hours
+                const createdAtDate = new Date(createdAt);
+                const lama_tahap_ms = currentDate - createdAtDate;
+                const lama_tahap_hours = Math.round(lama_tahap_ms / (1000 * 60 * 60));
+    
+                // Check if the item already exists in the result
+                if (!result[rf_id]) {
+                    result[rf_id] = {
+                        id_peternakan: req.dataAuth.id_peternakan,
+                        rf_id,
+                        id_ternak,
+                        id_kandang,
+                        lama_fattening: {
+                            hari: 0,
+                            jam: 0
+                        },
+                        tahapan_fattening: {
+                            [tahap_fattening]: {
+                                id_fattening,
+                                bobot_fattening,
+                                keterangan: "", // Initialize keterangan with an empty string
+                                createdAt,
+                                updatedAt,
+                                lama_tahap: {
+                                    hari: Math.floor(lama_tahap_hours / 24),
+                                    jam: lama_tahap_hours % 24
+                                }
+                            }
+                        }
+                    };
+                } else {
+                    // If the item already exists, add the new entry to its history
+                    result[rf_id].tahapan_fattening[tahap_fattening] = {
+                        id_fattening,
+                        bobot_fattening,
+                        keterangan: "", // Initialize keterangan with an empty string
+                        createdAt,
+                        updatedAt,
+                        lama_tahap: {
+                            hari: Math.floor(lama_tahap_hours / 24),
+                            jam: lama_tahap_hours % 24
+                        }
+                    };
+                }
+    
+                return result;
+            }, {});
+    
+            const transformedArray = Object.values(transformedData);
+    
+            // Calculate lama_fattening based on tahap_fattening equal to 1
+            for (const ternak of transformedArray) {
+                const tahap1 = ternak.tahapan_fattening[1];
+                if (tahap1) {
+                    ternak.lama_fattening = tahap1.lama_tahap;
+                }
+            }
+    
+            // Now, let's add the logic to update keterangan
+            for (const ternak of transformedArray) {
+                const tahap1 = ternak.tahapan_fattening[1];
+                const tahap2 = ternak.tahapan_fattening[2];
+    
+                if (tahap1 && tahap2) {
+                    if (tahap2.bobot_fattening >= tahap1.bobot_fattening) {
+                        tahap1.keterangan = "Terpenuhi";
+                    } else {
+                        tahap1.keterangan = "Tidak Terpenuhi";
+                    }
+                }
+            }
+    
+            return {
+                code: 200,
+                data: {
+                    total: transformedArray.length,
+                    list: transformedArray,
+                },
+            };
+        } catch (error) {
+            return errorHandler(error);
+        }
+    }
 
     /// CONCERN !! CREATE TABEL FATTENING
     createFattening = async (req) => {
@@ -189,8 +294,6 @@ class _fattening {
                 id_kandang,
                 bobot_fattening,
                 tahap_fattening,
-                keterangan,
-                status_keluar,
             } = req.body;
     
             console.log(req.body);
@@ -201,8 +304,6 @@ class _fattening {
                 id_kandang: joi.number().required(),
                 tahap_fattening: joi.number().required(),
                 bobot_fattening: joi.number().allow(null),
-                keterangan: joi.string().allow(null),
-                status_keluar: joi.string().allow(null),
             });
     
             const { error } = schema.validate(req.body);
@@ -226,8 +327,6 @@ class _fattening {
                 id_kandang,
                 bobot_fattening,
                 tahap_fattening,
-                keterangan,
-                status_keluar,
                 rf_id,
             });
 
@@ -285,7 +384,6 @@ class _fattening {
                     bobot_fattening,
                     tahap_fattening,
                     keterangan,
-                    status_keluar,
                 } = req.body;
         
                 console.log(req.body);
@@ -297,7 +395,6 @@ class _fattening {
                     tahap_fattening: joi.number().allow(null),
                     bobot_fattening: joi.number().required(),
                     keterangan: joi.string().allow(null),
-                    status_keluar: joi.string().allow(null),
                 });
         
                 const { error } = schema.validate(req.body);
@@ -330,7 +427,6 @@ class _fattening {
                     bobot_fattening,
                     tahap_fattening : 2,
                     keterangan,
-                    status_keluar,
                     rf_id,
                 });
     
@@ -384,7 +480,6 @@ class _fattening {
                     id_kandang: joi.number().allow(null),
                     tahap_fattening: joi.number().allow(null),
                     bobot_fattening: joi.number().required(),
-                    keterangan: joi.string().required(),
                     status_keluar: joi.string().required(),
                 });
         
@@ -418,8 +513,6 @@ class _fattening {
                     id_kandang : ternakFat.id_kandang,
                     bobot_fattening,
                     tahap_fattening : 3,
-                    keterangan,
-                    status_keluar,
                     rf_id,
                 });
                 
@@ -541,7 +634,7 @@ class _fattening {
                 id_kandang,
                 bobot_fattening,
                 keterangan,
-                status_keluar,
+                // status_keluar,
                 
                 
             } = req.body;
@@ -555,8 +648,7 @@ class _fattening {
                 id_kandang: joi.number().required(),
                 bobot_fattening: joi.number().required(),
                 keterangan: joi.string().required(),
-                
-                status_keluar: joi.string().required(),
+                // status_keluar: joi.string().required(),
                 
             });
     
@@ -584,7 +676,7 @@ class _fattening {
                 bobot_fattening,
                 keterangan,
                 
-                status_keluar,
+                // status_keluar,
                 
                 rf_id,
             });

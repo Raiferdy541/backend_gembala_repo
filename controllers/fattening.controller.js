@@ -26,6 +26,11 @@ const fatteningController = (db) => {
             response.sendResponse(res, list);
     });
 
+    FatteningController.get('/main_ternak_detail', authentication, adminMiddleware, async (req, res, next) => {
+        const list = await s$fattening.getTernakMainFatteningDetail(req);
+        response.sendResponse(res, list);
+});
+
     FatteningController.post('/main_ternak', authentication, adminMiddleware, async (req, res, next) => {
         const list = await s$fattening.createFattening(req);
         response.sendResponse(res, list);
