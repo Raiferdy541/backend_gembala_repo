@@ -548,6 +548,81 @@ class _superAdmin{
     updatePeternakan = async (req) => {
         // Validate data
         const schema = joi.object({
+            id_peternakan: joi.number().required(),
+            nama_peternakan: joi.string().allow(null),
+            alamat: joi.string().allow(null),
+            postcode: joi.number().allow(null),
+        });
+        const {error, value} = schema.validate(req.body);
+        if (error) newError(400, error.details[0].message, 'UpdatePeternakan Service');
+        
+        // Check user account
+        // const checkUser = await this.db.AuthUser.findOne({where : {id_user : value.id_user}});
+        // if (!checkUser) newError(400, 'Pengguna tidak ditemukan', 'UpdatePeternakan Service');
+        const checkPeternakan = await this.db.Peternakan.findOne({where : {id_peternakan : value.id_peternakan}});
+
+        // Update data
+        if(value.nama_peternakan){
+            // check username
+            // const checkUsername = await this.db.Peternakan.findOne({where : {
+            //     nama_peternakan: value.nama_peternakan,
+            // }});
+
+            // if (checkUsername) newError(400, 'Nama Pengguna sudah terdaftar', 'UpdateAccount Service');
+            
+            const updatedAccount = await this.db.Peternakan.update({
+                nama_peternakan: value.nama_peternakan
+            }, {
+                where: {id_peternakan : value.id_peternakan}
+            });
+        }
+        if(value.alamat){
+            // Check nomor telepon
+            // const checkNomorTelepon = await this.db.Peternakan.findOne({where : {
+            //     alamat: value.alamat,
+            // }});
+
+            // if (checkNomorTelepon) newError(400, 'Nomor telepon sudah terdaftar', 'UpdateAccount Service');
+
+            const updatedAccount = await this.db.Peternakan.update({
+                alamat: value.alamat 
+            }, {
+                where: {id_peternakan : value.id_peternakan}
+            });
+        }
+        if(value.postcode){
+            // Check nomor telepon
+            // const checkEmail = await this.db.Peternakan.findOne({where : {
+            //     email: value.email,
+            // }});
+
+            // if (checkEmail) newError(400, 'Email sudah terdaftar', 'UpdateAccount Service');
+
+            const updatedAccount = await this.db.Peternakan.update({
+                postcode: value.postcode
+            }, {
+                where: {id_peternakan : value.id_peternakan}
+            });
+        }
+
+        const updatedPeternakan = await this.db.Peternakan.findOne({where : {id_peternakan : checkPeternakan.id_peternakan}});
+
+
+        // if (updatedAccount <= 0) newError(500, 'Gagal mengupdate data pengguna', 'UpdateAccount Service');
+        
+        return {
+            code : 200,
+            data : {
+                updatedPeternakan,
+                updatedAt: date.format(new Date(), 'YYYY-MM-DD HH:mm:ss')
+            }
+        }
+    }
+
+    /// Update Peternakan Service
+    updatePeternakanIdUser = async (req) => {
+        // Validate data
+        const schema = joi.object({
             id_user: joi.number().required(),
             nama_peternakan: joi.string().allow(null),
             alamat: joi.string().allow(null),
@@ -563,12 +638,6 @@ class _superAdmin{
 
         // Update data
         if(value.nama_peternakan){
-            // check username
-            // const checkUsername = await this.db.Peternakan.findOne({where : {
-            //     nama_peternakan: value.nama_peternakan,
-            // }});
-
-            // if (checkUsername) newError(400, 'Nama Pengguna sudah terdaftar', 'UpdateAccount Service');
             
             const updatedAccount = await this.db.Peternakan.update({
                 nama_peternakan: value.nama_peternakan
@@ -577,12 +646,6 @@ class _superAdmin{
             });
         }
         if(value.alamat){
-            // Check nomor telepon
-            // const checkNomorTelepon = await this.db.Peternakan.findOne({where : {
-            //     alamat: value.alamat,
-            // }});
-
-            // if (checkNomorTelepon) newError(400, 'Nomor telepon sudah terdaftar', 'UpdateAccount Service');
 
             const updatedAccount = await this.db.Peternakan.update({
                 alamat: value.alamat 
@@ -591,12 +654,6 @@ class _superAdmin{
             });
         }
         if(value.postcode){
-            // Check nomor telepon
-            // const checkEmail = await this.db.Peternakan.findOne({where : {
-            //     email: value.email,
-            // }});
-
-            // if (checkEmail) newError(400, 'Email sudah terdaftar', 'UpdateAccount Service');
 
             const updatedAccount = await this.db.Peternakan.update({
                 postcode: value.postcode

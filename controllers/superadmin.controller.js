@@ -74,6 +74,11 @@ const superAdminController = (db) => {
         response.sendResponse(res, updatePeternakan);
     });
 
+    SuperAdminController.put('/update-peternakan-id', authentication, superAdminMiddleware, async (req, res, next) => {
+        const updatePeternakan = await s$superAdmin.updatePeternakanIdUser(req);
+        response.sendResponse(res, updatePeternakan);
+    });
+
     /**
      * Set free farm auto
      */
