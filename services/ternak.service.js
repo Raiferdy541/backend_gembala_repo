@@ -440,7 +440,7 @@ class _ternak {
 
             // Check if Ternak already exist
             const ternak = await this.db.Ternak.findOne({where: {rf_id: value.rf_id, id_peternakan: req.dataAuth.id_peternakan}});
-            if (ternak) newError(400, 'RFID Ternak sudah terdaftar', 'createTernak Service');
+            if (ternak) newError(400, 'QRID Ternak sudah terdaftar', 'createTernak Service');
 
             // Add id_user to params
             value.id_peternakan = req.dataAuth.id_peternakan

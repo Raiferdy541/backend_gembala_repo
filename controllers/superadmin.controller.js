@@ -64,6 +64,16 @@ const superAdminController = (db) => {
         response.sendResponse(res, deleteAccounts);
     });
 
+    SuperAdminController.put('/update-account', authentication, superAdminMiddleware, async (req, res, next) => {
+        const updateAccounts = await s$superAdmin.updateAccount(req);
+        response.sendResponse(res, updateAccounts);
+    });
+
+    SuperAdminController.put('/update-peternakan', authentication, superAdminMiddleware, async (req, res, next) => {
+        const updatePeternakan = await s$superAdmin.updatePeternakan(req);
+        response.sendResponse(res, updatePeternakan);
+    });
+
     /**
      * Set free farm auto
      */
