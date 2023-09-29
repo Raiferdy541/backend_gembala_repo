@@ -291,7 +291,7 @@ class _ternak {
             req.query.tanggal_keluar = null
             // Query data
             const list = await this.db.Ternak.findAll({
-                attributes: ['id_ternak', 'tanggal_lahir'],
+                attributes: ['id_ternak', 'tanggal_lahir', 'rf_id'],
                 include: [
                     {
                         model: this.db.Bangsa,

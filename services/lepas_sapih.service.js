@@ -139,7 +139,7 @@ class _lepasSapih{
 
             // Get ternak
             const ternak = await this.db.Ternak.findAll({
-                attributes: ['id_ternak'],
+                attributes: ['id_ternak', 'rf_id'],
                 include: [
                     {
                         model: this.db.RiwayatFase,

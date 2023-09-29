@@ -22,7 +22,7 @@ class _kebuntingan{
 
             // Get ternak in fase kebuntingan
             const ternak = await this.db.Ternak.findAll({
-                attributes: ['id_ternak', 'id_kandang'],
+                attributes: ['id_ternak', 'id_kandang', 'rf_id'],
                 include: [{
                     model: this.db.Kandang,
                     as: 'kandang',

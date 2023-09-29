@@ -303,7 +303,7 @@ class _dashboard{
 
             // Get data ternak cempe
             const ternakCempe = await this.db.Ternak.findAll({
-                attributes: ['id_ternak'],
+                attributes: ['id_ternak', 'rf_id'],
                 include: [
                     {
                         model: this.db.Timbangan,

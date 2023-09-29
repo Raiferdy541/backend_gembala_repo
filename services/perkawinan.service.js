@@ -21,7 +21,7 @@ class _perkawinan {
 
             // Get ternak in waiting list perkawinan
             const ternakWaitingList = await this.db.Ternak.findAll({
-                attributes: ['id_ternak'],
+                attributes: ['id_ternak', 'rf_id'],
                 include: [
                     {
                         model: this.db.Kandang,
@@ -446,7 +446,7 @@ class _perkawinan {
             req.query.id_peternakan = req.dataAuth.id_peternakan;
             req.query.id_fp = dataFasePerkawinan.dataValues.id_fp;
             const dataTernakInPerkawinan = await this.db.Ternak.findAll({
-                attributes: ['id_ternak', 'jenis_kelamin'],
+                attributes: ['id_ternak', 'jenis_kelamin', 'rf_id'],
                 include: [
                     {
                         model: this.db.RiwayatFase,
@@ -549,7 +549,7 @@ class _perkawinan {
     
             for(let i = 0; i < getIndukanInRiwayatPerkawinan.length; i++){
                 const dataIndukan = await this.db.Ternak.findOne({
-                    attributes: ['id_ternak', 'id_bangsa'],
+                    attributes: ['id_ternak', 'id_bangsa', 'rf_id'],
                     include: [
                         {
                             model: this.db.Bangsa,

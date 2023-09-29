@@ -10,7 +10,7 @@ class _treatment{
             if(!req.query.id_ternak) newError(400, 'id_ternak tidak boleh kosong', 'getTreatment Service');
 
             const ternak = await this.db.Ternak.findOne({
-                attributes: ['id_ternak', 'id_fp'],
+                attributes: ['id_ternak', 'id_fp', 'rf_id'],
                 include: [
                     {
                         model: this.db.Fase,
