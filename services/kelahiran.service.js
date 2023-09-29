@@ -37,8 +37,98 @@ class _kelahiran {
         }
     }
 
-    // Get data kelahiran
-    getKelahiran = async (req) => {
+        // Get data kelahiran BARU CONCERN
+        getKelahiran = async (req) => {
+            try {
+                // Get data fase kelahiran
+                const faseKelahiran = await this.db.Fase.findOne({where: {fase: "Kelahiran"}});
+                if (!faseKelahiran) newError(404, 'Data Fase Kelahiran tidak ditemukan', 'getKelahiran Service');
+    
+                // Get data kelahiran
+                const list = await this.db.Ternak.findAll({
+                    attributes: ['rf_id','id_ternak', 'jenis_kelamin', 'tanggal_lahir'],
+                    include: [
+                        {
+                            model: this.db.Bangsa,
+                            as: 'bangsa',
+                            attributes: ['id_bangsa', 'bangsa']
+                        },
+                        {
+                            model: this.db.Kandang,
+                            as: 'kandang',
+                            attributes: ['id_kandang', 'kode_kandang']
+                        },
+                        {
+                            model: this.db.Timbangan,
+                            as: 'timbangan',
+                            attributes: ['berat', 'suhu', 'tanggal_timbang']
+                        }
+                    ],
+                    where: {
+                        id_peternakan: req.dataAuth.id_peternakan,
+                        id_fp: faseKelahiran.dataValues.id_fp
+                    }
+                });
+    
+                let totalByKandang = {}
+                let totalBetina = 0;
+                let totalJantan = 0;
+    
+    
+                for(let i=0; i<list.length; i++){
+
+                    if(list[i].dataValues.jenis_kelamin){
+                        if(list[i].dataValues.jenis_kelamin.toLowerCase() === 'betina'){
+                            totalBetina++;
+                        }else if(list[i].dataValues.jenis_kelamin.toLowerCase() === 'jantan'){
+                            totalJantan++;
+                        }
+                    }
+
+                    // Get Umur
+                    const umurHari = list[i].dataValues.tanggal_lahir ? Math.round((new Date() - new Date(list[i].dataValues.tanggal_lahir)) / (1000 * 60 * 60 * 24)) : 0;
+                    list[i].dataValues.umur = `${Math.floor(umurHari / 30)} bulan ${umurHari % 30} hari`;
+    
+                    // Get Berat & Suhu
+                    list[i].dataValues.berat = list[i].dataValues.timbangan.length > 0 ? list[i].dataValues.timbangan[list[i].dataValues.timbangan.length - 1].berat : 0;
+                    list[i].dataValues.suhu = list[i].dataValues.timbangan.length > 0 ? list[i].dataValues.timbangan[list[i].dataValues.timbangan.length - 1].suhu : 0;
+    
+                    delete list[i].dataValues.timbangan;
+    
+                    list[i].dataValues.kode_kandang = list[i].dataValues.kandang ? list[i].dataValues.kandang.dataValues.kode_kandang : null;
+    
+                    delete list[i].dataValues.kandang;
+    
+                    if(list[i].dataValues.kode_kandang != null){
+                        totalByKandang[list[i].dataValues.kode_kandang] ? totalByKandang[list[i].dataValues.kode_kandang]++ : totalByKandang[list[i].dataValues.kode_kandang] = 1;
+                    }
+    
+                }
+                if (list.length <= 0) newError(404, 'Data Kelahiran tidak ditemukan', 'getKelahiran Service');
+                const total = list.length;
+
+                return {
+                    code: 200,
+                    data: {
+                        kandang: {
+                            total: Object.keys(totalByKandang).length,
+                            list: totalByKandang
+                        },
+                        ternak:{
+                            total,
+                            total_betina: totalBetina,
+                            total_jantan: totalJantan,
+                            list
+                        }
+                    },
+                };
+            } catch (error) {
+                return errorHandler(error);
+            }
+        }
+
+    // Get data kelahiran sintax lama
+    getKelahiranLama = async (req) => {
         try {
             // Get data fase kelahiran
             const faseKelahiran = await this.db.Fase.findOne({where: {fase: "Kelahiran"}});

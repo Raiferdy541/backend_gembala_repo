@@ -286,7 +286,7 @@ class _lepasSapih{
         }
     }
 
-    // Get ternak lepas sapih for dashboard monitoring
+    // Get ternak lepas sapih for dashboard monitoring (YANG LAMA)
     getLepasSapihDashboard = async (req) => {
         try{
             // Get data fase lepas sapih
@@ -295,7 +295,7 @@ class _lepasSapih{
 
             // Get ternak
             const ternak = await this.db.Ternak.findAll({
-                attributes: ['id_ternak', 'jenis_kelamin', 'tanggal_lahir'],
+                attributes: ['id_ternak', 'jenis_kelamin', 'tanggal_lahir', 'rf_id'],
                 where: {
                     id_peternakan: req.dataAuth.id_peternakan,
                     id_fp: dataLepasSapih.dataValues.id_fp
@@ -327,10 +327,12 @@ class _lepasSapih{
             let totalByKandang = {};
             for(let i = 0; i < ternak.length; i++){
                 // Check total by jenis kelamin
-                if(ternak[i].dataValues.jenis_kelamin.toLowerCase() === 'betina'){
-                    totalBetina++;
-                }else if(ternak[i].dataValues.jenis_kelamin.toLowerCase() === 'jantan'){
-                    totalJantan++;
+                if(ternak[i].dataValues.jenis_kelamin){
+                    if(ternak[i].dataValues.jenis_kelamin.toLowerCase() === 'betina'){
+                        totalBetina++;
+                    }else if(ternak[i].dataValues.jenis_kelamin.toLowerCase() === 'jantan'){
+                        totalJantan++;
+                    }
                 }
 
                 // count ternak by kandang
