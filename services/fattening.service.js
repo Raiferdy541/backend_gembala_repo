@@ -519,7 +519,7 @@ class _fattening {
                 // CONCERN ADD RIWAYAT FATT
                 const tahap1 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:1} });
                 const tahap2 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:2} });
-                const tahap3 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:3} });
+                const tahap3 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:3} });    
 
                 const newRiwayatFattening = await this.db.RiwayatFattening.create({
                     id_peternakan: req.dataAuth.id_peternakan,
@@ -529,8 +529,21 @@ class _fattening {
                     bobot_tahap_2 : tahap2.bobot_fattening,
                     bobot_tahap_3 : tahap3.bobot_fattening,
                     status_keluar,
+                    keterangan : "",
                     rf_id,
                 })
+
+                const riwayatFat = await this.db.RiwayatFattening.findOne({ where: { rf_id, id_ternak : ternak.id_ternak } });
+
+                if (tahap3.bobot_fattening >= (tahap1.bobot_fattening + 5)) {
+                    const updatedFattening = await riwayatFat.update({
+                        keterangan : "Terpenuhi",
+                    });
+                } else {
+                    const updatedFattening = await riwayatFat.update({
+                        keterangan : "Tidak Terpenuhi",
+                    });
+                }
 
                 // DELETE Query Data [KALO DI DELETE SEMUA DATA BERELASI AKAN MUSNAH]
                 // SOLUSINYA BUAT TABEL BARU TERUS CREATE RIWAYATNYA
@@ -542,20 +555,6 @@ class _fattening {
                     }
                 });
                 if (del <= 0) newError(500, 'Gagal menghapus ternak', 'deleteTernak Service');
-    
-                // if(bobot_fattening){
-                //     const newTimbangan = await this.db.Timbangan.create({
-                //         berat: bobot_fattening,
-                //         suhu: 38,
-                //         id_ternak: ternak.id_ternak,
-                //         rf_id: rf_id,
-                //     }
-                //     )
-                //     return {
-                //         code: 201,
-                //         data: {newFattening,newTimbangan},
-                //     };
-                // }
     
                 if (!newFattening) {
                     return newError(500, 'Failed to create Fattening data', 'createFattening Service');
@@ -570,6 +569,96 @@ class _fattening {
                 console.log(error);
                 return errorHandler(error);
             }
+    }
+
+    pindahFase = async (req) => {
+        try {
+            const {
+                rf_id,
+                id_fp,
+                id_kandang
+            } = req.body;
+    
+            console.log(req.body);
+    
+            // Validasi data input menggunakan Joi atau sesuai kebutuhan Anda
+            const schema = joi.object({
+                rf_id: joi.string().required(),
+                id_fp: joi.number().required(),
+                id_kandang: joi.number().allow(null)
+            });
+
+            // Cari "id_ternak" berdasarkan "rf_id" dari tabel "s_ternak"
+            const ternak = await this.db.Ternak.findOne({ where: { rf_id } });
+            // console.log(ternak.id_ternak)
+    
+            if (!ternak) {
+                return newError(404, 'Ternak tidak terdaftar', 'createFattening Service');
+            }
+
+            const updatedFaseTernak = await ternak.update({
+                id_fp : id_fp ,
+            });
+
+            if(id_kandang){
+                const updatedKandangTernak = await ternak.update({
+                    id_kandang : id_kandang ,
+                });
+            }
+
+            // Cari "id_ternak" berdasarkan "rf_id" dari tabel "s_ternak"
+            const ternakFat = await this.db.Fattening.findOne({ where: { rf_id } });
+            // console.log(ternak.id_ternak)
+    
+            if (!ternakFat) {
+                return newError(404, 'Ternak bukan pada fase fattening', 'createFattening Service');
+            }
+
+            // TAMBAHIN LOGIC UPDATE UNTUK DI TABEL TERNAKNYA
+
+            const tahap1 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:1} });
+            const tahap2 = await this.db.Fattening.findOne({ where: { rf_id, tahap_fattening:2} });
+
+            if (tahap2) {
+                const newRiwayatFattening = await this.db.RiwayatFattening.create({
+                    id_peternakan: req.dataAuth.id_peternakan,
+                    id_ternak: ternak.id_ternak,
+                    id_kandang : ternakFat.id_kandang,
+                    bobot_tahap_1 : tahap1.bobot_fattening,
+                    bobot_tahap_2 : tahap2.bobot_fattening,
+                    status_keluar : "Pindah Fase",
+                    keterangan : "Tidak Terpenuhi",
+                    rf_id,
+                })
+            } else {
+                const newRiwayatFattening = await this.db.RiwayatFattening.create({
+                    id_peternakan: req.dataAuth.id_peternakan,
+                    id_ternak: ternak.id_ternak,
+                    id_kandang : ternakFat.id_kandang,
+                    bobot_tahap_1 : tahap1.bobot_fattening,
+                    status_keluar : "Pindah Fase",
+                    keterangan : "Tidak Terpenuhi",
+                    rf_id,
+                })
+            }
+
+            const del = await this.db.Fattening.destroy({
+                where: {
+                    id_ternak: ternakFat.id_ternak,
+                }
+            });
+            if (del <= 0) newError(500, 'Gagal menghapus ternak', 'deleteTernak Service');
+
+            return {
+                code: 200,
+                data: {
+                    ternak
+                },
+            };
+         
+        } catch (error) {
+            return errorHandler(error);
+        }
     }
 
     getTernakFatteningKeluar = async (req) => {

@@ -57,6 +57,10 @@ const fatteningController = (db) => {
         response.sendResponse(res, list);
     });
 
+    FatteningController.put('/pindah_fase', authentication, adminMiddleware, async (req, res, next) => {
+        const list = await s$fattening.pindahFase(req);
+        response.sendResponse(res, list);
+    });
 
     //////////////
     
