@@ -543,9 +543,82 @@ class _superAdmin{
         }
     }
 
+    /// Update Peternakan Service by Id Peternakan
+    updatePeternakan = async (req) => {
+        // Validate data
+        const schema = joi.object({
+            id_peternakan: joi.number().required(),
+            nama_peternakan: joi.string().allow(null),
+            alamat: joi.string().allow(null),
+            postcode: joi.number().allow(null),
+        });
+        const {error, value} = schema.validate(req.body);
+        if (error) newError(400, error.details[0].message, 'UpdatePeternakan Service');
+        
+        // Check user account
+        const checkPeternakan = await this.db.Peternakan.findOne({where : {id_peternakan : value.id_peternakan}});
+        if (!checkPeternakan) newError(400, 'Peternakan tidak ditemukan', 'UpdatePeternakan Service');
+
+        // Update data
+        if(value.nama_peternakan){
+            // check username
+            // const checkUsername = await this.db.Peternakan.findOne({where : {
+            //     nama_peternakan: value.nama_peternakan,
+            // }});
+
+            // if (checkUsername) newError(400, 'Nama Pengguna sudah terdaftar', 'UpdateAccount Service');
+            
+            const updatedAccount = await this.db.Peternakan.update({
+                nama_peternakan: value.nama_peternakan
+            }, {
+                where: {id_peternakan : checkPeternakan.id_peternakan}
+            });
+        }
+        if(value.alamat){
+            // Check nomor telepon
+            // const checkNomorTelepon = await this.db.Peternakan.findOne({where : {
+            //     alamat: value.alamat,
+            // }});
+
+            // if (checkNomorTelepon) newError(400, 'Nomor telepon sudah terdaftar', 'UpdateAccount Service');
+
+            const updatedAccount = await this.db.Peternakan.update({
+                alamat: value.alamat 
+            }, {
+                where: {id_peternakan : checkPeternakan.id_peternakan}
+            });
+        }
+        if(value.postcode){
+            // Check nomor telepon
+            // const checkEmail = await this.db.Peternakan.findOne({where : {
+            //     email: value.email,
+            // }});
+
+            // if (checkEmail) newError(400, 'Email sudah terdaftar', 'UpdateAccount Service');
+
+            const updatedAccount = await this.db.Peternakan.update({
+                postcode: value.postcode
+            }, {
+                where: {id_peternakan : checkPeternakan.id_peternakan}
+            });
+        }
+
+        const updatedPeternakan = await this.db.Peternakan.findOne({where : {id_peternakan : checkPeternakan.id_peternakan}});
+
+
+        // if (updatedAccount <= 0) newError(500, 'Gagal mengupdate data pengguna', 'UpdateAccount Service');
+        
+        return {
+            code : 200,
+            data : {
+                updatedPeternakan,
+                updatedAt: date.format(new Date(), 'YYYY-MM-DD HH:mm:ss')
+            }
+        }
+    }
     
     /// Update Peternakan Service
-    updatePeternakan = async (req) => {
+    updatePeternakanByIdUser = async (req) => {
         // Validate data
         const schema = joi.object({
             id_user: joi.number().required(),
